@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>연세서울로심리상담센터</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- lucide-react via CDN (UMD) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+    body { font-family: 'Noto Sans KR', sans-serif; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(2rem); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .anim-fade { animation: fadeIn 0.7s ease both; }
+    .anim-slide { animation: slideUp 0.5s ease both; }
+    .anim-bounce { animation: bounce 1.5s infinite; }
+    .anim-pulse { animation: pulse 2s infinite; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // lucide 아이콘을 직접 SVG로 인라인 정의
+    const Icon = ({ name, size = 24, className = '', fill = 'none', style = {} }) => {
+      const icons = {
+        Menu: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+        X: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+        Clock: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+        MapPin: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+        Phone: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+        ChevronRight: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><polyline points="9 18 15 12 9 6"/></svg>,
+        Quote: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>,
+        Heart: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+        Award: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>,
+        Users: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+        MessageCircle: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+        ExternalLink: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+        Share2: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
+        BookOpen: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+        GraduationCap: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+      };
+      return icons[name] || null;
+    };
+
+    const colors = {
+      primary: '#003876',
+      secondary: '#58595B',
+      kakao: '#FEE500',
+      naver: '#03C75A',
+    };
+
+    const Logo = ({ dim }) => (
+      <div className="flex items-center gap-2">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="5" width="70" height="70" rx="15" fill={dim ? '#555' : colors.primary} />
+          <path d="M75 15C85 15 95 25 95 45C95 65 85 85 65 95C65 85 70 75 75 65L75 15Z" fill={dim ? '#888' : colors.secondary} />
+          <circle cx="25" cy="30" r="4" fill="white" />
+          <circle cx="55" cy="30" r="4" fill="white" />
+          <path d="M25 45Q40 55 55 45" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" />
+        </svg>
+        <div className="flex flex-col text-left">
+          <span className="font-bold text-lg leading-none" style={{ color: dim ? '#aaa' : colors.primary }}>연세서울로</span>
+          <span className="text-xs font-medium" style={{ color: dim ? '#777' : colors.secondary }}>심리상담센터</span>
+        </div>
+      </div>
+    );
+
+    const App = () => {
+      const [activeTab, setActiveTab] = useState('intro');
+      const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+      const navItems = [
+        { id: 'intro', label: '센터 소개' },
+        { id: 'services', label: '이용 내용' },
+        { id: 'reservation', label: '이용안내/예약' }
+      ];
+
+      return (
+        <div className="min-h-screen bg-gray-50">
+          {/* Navigation */}
+          <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100" style={{backdropFilter:'blur(8px)'}}>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between h-20">
+                <div className="flex items-center cursor-pointer" onClick={() => setActiveTab('intro')}>
+                  <Logo />
+                </div>
+                <div className="hidden md:flex items-center space-x-8">
+                  {navItems.map(item => (
+                    <button key={item.id} onClick={() => setActiveTab(item.id)}
+                      className={`text-base font-semibold transition-all ${activeTab === item.id ? 'text-blue-800 border-b-2 border-blue-800 py-1' : 'text-gray-500 hover:text-blue-700'}`}>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="md:hidden flex items-center">
+                  <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 text-gray-600">
+                    <Icon name={isMenuOpen ? 'X' : 'Menu'} size={28} />
+                  </button>
+                </div>
+              </div>
+            </div>
+            {isMenuOpen && (
+              <div className="md:hidden bg-white border-b border-gray-100 px-4 py-6 space-y-4">
+                {navItems.map(item => (
+                  <button key={item.id} onClick={() => { setActiveTab(item.id); setIsMenuOpen(false); }}
+                    className={`block w-full text-left px-4 py-3 rounded-xl font-bold ${activeTab === item.id ? 'bg-blue-50 text-blue-800' : 'text-gray-600'}`}>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </nav>
+
+          <main className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+
+            {/* --- 탭 1: 센터 소개 --- */}
+            {activeTab === 'intro' && (
+              <div className="anim-fade">
+                <section className="text-center mb-16">
+                  <div className="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-50 text-blue-700 font-bold text-xs tracking-wider">
+                    나라는 존재 자체로 행복한 세상을 꿈꿉니다
+                  </div>
+                  <h1 className="text-3xl md:text-5xl font-black mb-6 leading-tight" style={{ color: colors.primary }}>
+                    연세서울로심리상담센터
+                  </h1>
+                  <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed font-medium">
+                    연세서울로심리상담센터는 상담, 교육, 심리 분야의 전문적 교육을 받은<br />
+                    <span className="text-blue-900 font-bold underline decoration-blue-200 underline-offset-4">석박사 상담 전문가</span>들이 함께 운영하는 심리상담 전문 기관입니다.
+                  </p>
+                </section>
+
+                <section className="grid md:grid-cols-2 gap-8 items-stretch mb-20">
+                  <div className="bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-center">
+                    <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
+                      <Icon name="Award" className="text-blue-800" size={28} /> 상담진 이력
+                    </h2>
+                    <ul className="space-y-6">
+                      <li className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <Icon name="GraduationCap" className="text-blue-800" size={24} />
+                        </div>
+                        <div>
+                          <p className="font-black text-xl text-blue-900">연세대학교 교육학과/심리학과</p>
+                          <p className="text-gray-500 font-bold">석사 / 박사 학위 수여</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <Icon name="Award" className="text-blue-800" size={24} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-800">한국상담심리학회 상담심리사 1급/2급</p>
+                          <p className="text-sm text-gray-400">보건복지부/학회 공인 자격</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <Icon name="BookOpen" className="text-blue-800" size={24} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-800">청소년상담사 / 전문상담교사 자격</p>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="rounded-3xl p-10 text-white flex flex-col justify-center relative overflow-hidden" style={{ background: '#003876' }}>
+                    <div className="relative z-10">
+                      <Icon name="Quote" className="mb-6 opacity-40" size={40} />
+                      <p className="text-xl md:text-2xl font-light leading-relaxed mb-8">
+                        "대학원 시절 함께했던 동료들이<br />
+                        <span className="font-bold text-blue-200">서울역 인근</span>에 처음으로 둥지를 틀었습니다.<br />
+                        책임감과 성실함으로 최선을 다하겠습니다."
+                      </p>
+                      <p className="text-blue-300 font-bold tracking-widest text-sm">— 연세서울로 상담진 일동</p>
+                    </div>
+                    <div className="absolute -bottom-10 -right-10 opacity-10">
+                      <Icon name="GraduationCap" size={240} />
+                    </div>
+                  </div>
+                </section>
+
+                <section className="text-center bg-white p-10 rounded-3xl border-2 border-dashed border-blue-100">
+                  <p className="text-xl font-bold text-blue-900 mb-8">
+                    🌈 연세서울로는 모든 사회적 소수자를 지지합니다.
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <button onClick={() => setActiveTab('reservation')}
+                      className="text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-2"
+                      style={{ background: '#003876' }}>
+                      상담 예약 안내 보기 <Icon name="ChevronRight" size={20} />
+                    </button>
+                    <a href="https://blog.naver.com/yonseiseoullo" target="_blank" rel="noopener noreferrer"
+                      className="text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-2"
+                      style={{ background: '#03C75A' }}>
+                      네이버 블로그 소식 <Icon name="ExternalLink" size={20} />
+                    </a>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* --- 탭 2: 이용 내용 --- */}
+            {activeTab === 'services' && (
+              <div className="anim-slide">
+                <h2 className="text-3xl font-black text-center mb-4">심리상담, 언제 필요할까요?</h2>
+                <p className="text-gray-500 text-center mb-12 font-medium">마음이 보내는 신호에 귀 기울여주세요.</p>
+                <div className="grid md:grid-cols-2 gap-6 mb-16">
+                  {[
+                    { title: '심리적 어려움', desc: '마음이 자꾸만 아프고 일상이 힘들게 느껴질 때', icon: 'Heart' },
+                    { title: '정서적 불안/우울', desc: '감정 조절이 어렵고 우울함이나 불안이 지속될 때', icon: 'Users' },
+                    { title: '수면 및 활력 저하', desc: '잠을 이루기 어렵고 이전처럼 생활하기 힘들 때', icon: 'Clock' },
+                    { title: '관계의 갈등', desc: '주변 사람들과 반복적인 문제가 생길 때', icon: 'MessageCircle' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex items-start gap-5 hover:border-blue-200 transition-all">
+                      <div className="bg-blue-50 text-blue-800 p-4 rounded-2xl flex-shrink-0">
+                        <Icon name={item.icon} size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-xl mb-2 text-gray-800">{item.title}</h3>
+                        <p className="text-gray-500 font-medium leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-blue-50 rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center gap-12">
+                  <div className="md:w-3/5">
+                    <h3 className="text-3xl font-black mb-6 text-blue-900 leading-tight">
+                      전문가와 함께하는<br />1:1 맞춤형 치유 과정
+                    </h3>
+                    <p className="text-blue-800 opacity-70 text-lg mb-8 font-medium leading-relaxed">
+                      개인의 고유한 특성을 존중하며, 과학적이고 입증된 상담 기법을 통해
+                      마음의 근본적인 원인을 찾고 건강한 변화를 이끌어냅니다.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {['개인 심리상담', '청소년/성인 검사', '정서 발달 지원', '커플/가족 상담'].map((t, i) => (
+                        <div key={i} className="flex items-center gap-3 bg-white bg-opacity-60 p-4 rounded-2xl">
+                          <div className="text-white p-1 rounded-full" style={{ background: '#003876' }}><Icon name="ChevronRight" size={14} /></div>
+                          <span className="font-bold text-blue-900">{t}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="md:w-2/5 flex justify-center">
+                    <div className="w-64 h-64 bg-white rounded-full flex items-center justify-center shadow-2xl relative">
+                      <Icon name="Heart" size={100} className="text-blue-100" fill="#dbeafe" />
+                      <div className="absolute -top-4 -right-4 text-white p-6 rounded-3xl shadow-xl anim-pulse" style={{ background: '#003876' }}>
+                        <Icon name="Quote" size={24} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* --- 탭 3: 예약 안내 --- */}
+            {activeTab === 'reservation' && (
+              <div className="anim-fade">
+                <h2 className="text-3xl font-black text-center mb-12 tracking-tight">상담 예약 및 오시는 길</h2>
+                <div className="grid lg:grid-cols-5 gap-8 mb-16">
+                  <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                    <h3 className="text-xl font-black mb-8 flex items-center gap-2 text-blue-900">
+                      <Icon name="Clock" size={24} /> 운영 시간 안내
+                    </h3>
+                    <div className="space-y-5">
+                      <div className="flex justify-between items-center pb-4 border-b border-gray-50">
+                        <span className="text-gray-500 font-bold">평일</span>
+                        <span className="font-black text-blue-900">10:00 - 21:00</span>
+                      </div>
+                      <div className="flex justify-between items-center pb-4 border-b border-gray-50">
+                        <span className="text-gray-500 font-bold">토요일</span>
+                        <span className="font-black text-blue-900">10:00 - 17:00</span>
+                      </div>
+                      <div className="flex justify-between items-center text-red-500 font-bold bg-red-50 p-4 rounded-2xl">
+                        <span>일요일 / 공휴일</span>
+                        <span>휴무</span>
+                      </div>
+                    </div>
+                    <div className="mt-8 p-5 bg-blue-50 rounded-2xl text-blue-800 text-sm leading-relaxed font-bold">
+                      ⚠️ 상담은 100% 사전 예약제로 운영됩니다.<br />
+                      미리 예약 후 방문해 주시면 정성을 다해 모시겠습니다.
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-3 space-y-8">
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                      <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-blue-900">
+                        <Icon name="MapPin" size={24} /> 센터 정보
+                      </h3>
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div>
+                          <p className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Address</p>
+                          <p className="font-black text-lg text-gray-800 leading-snug">
+                            서울 중구 중림로 50-1<br />스카이천사빌딩 지하 2층
+                          </p>
+                          <p className="text-sm text-blue-600 mt-2 font-bold">서울역 2번 / 충정로역 5번 출구 인근</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Contact</p>
+                          <p className="font-black text-2xl text-blue-800 tracking-tighter">0507-1350-5394</p>
+                          <p className="text-sm text-gray-400 mt-1">네이버 비즈니스 전화</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="p-6 rounded-3xl flex flex-col justify-between border border-yellow-200" style={{ background: '#FEE500' }}>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-1.5 rounded-xl" style={{ background: '#3C1E1E' }}>
+                            <Icon name="MessageCircle" size={20} className="text-white" fill="white" />
+                          </div>
+                          <span className="font-black" style={{ color: '#3C1E1E' }}>카카오톡 예약</span>
+                        </div>
+                        <p className="text-xs font-bold mb-4" style={{ color: 'rgba(60,30,30,0.7)' }}>채널에서 '연세서울로심리상담센터'를 검색하세요.</p>
+                        <a href="http://pf.kakao.com/_xixbJJxj/chat" target="_blank" rel="noopener noreferrer"
+                          className="py-3 rounded-2xl font-black text-center flex items-center justify-center gap-2 text-white"
+                          style={{ background: '#3C1E1E' }}>
+                          상담하기 <Icon name="ChevronRight" size={18} />
+                        </a>
+                      </div>
+
+                      <div className="p-6 rounded-3xl flex flex-col justify-between text-white border border-green-600" style={{ background: '#03C75A' }}>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-white p-1.5 rounded-xl" style={{ color: '#03C75A' }}>
+                            <Icon name="Share2" size={20} />
+                          </div>
+                          <span className="font-black">네이버 블로그</span>
+                        </div>
+                        <p className="text-white text-xs font-bold mb-4 opacity-80">상담 후기와 센터의 일상을 블로그에서 만나보세요.</p>
+                        <a href="https://blog.naver.com/yonseiseoullo" target="_blank" rel="noopener noreferrer"
+                          className="bg-white py-3 rounded-2xl font-black text-center flex items-center justify-center gap-2"
+                          style={{ color: '#03C75A' }}>
+                          블로그 방문 <Icon name="ChevronRight" size={18} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="flex justify-between items-center mb-6 px-4">
+                    <h4 className="font-black text-lg text-gray-700">찾아오시는 길 지도</h4>
+                    <a href="https://www.google.com/maps/search/서울+중구+중림로+50-1+연세서울로심리상담센터"
+                      target="_blank" rel="noopener noreferrer"
+                      className="text-sm text-blue-800 font-black hover:underline flex items-center gap-1">
+                      Google 지도로 길찾기 <Icon name="ExternalLink" size={14} />
+                    </a>
+                  </div>
+                  <div className="w-full h-96 bg-gray-100 rounded-2xl overflow-hidden relative cursor-pointer"
+                    onClick={() => window.open('https://www.google.com/maps/search/서울+중구+중림로+50-1+연세서울로심리상담센터', '_blank')}>
+                    <div className="absolute inset-0 bg-blue-50 bg-opacity-50 flex items-center justify-center">
+                      <div className="z-10 flex flex-col items-center">
+                        <div className="bg-white p-5 rounded-full shadow-2xl mb-4 text-blue-800 anim-bounce">
+                          <Icon name="MapPin" size={48} fill="#dbeafe" className="text-blue-800" />
+                        </div>
+                        <div className="bg-white px-6 py-4 rounded-2xl shadow-xl text-center border border-blue-100">
+                          <p className="font-black text-lg text-blue-900">연세서울로심리상담센터</p>
+                          <p className="text-xs text-gray-400 mt-1 font-bold">중림로 50-1 스카이천사빌딩 B2</p>
+                        </div>
+                      </div>
+                      <div className="absolute inset-0 pointer-events-none opacity-5"
+                        style={{ backgroundImage: 'radial-gradient(#003876 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+                    </div>
+                    <div className="absolute bottom-6 right-6 bg-white bg-opacity-80 px-4 py-2 rounded-xl shadow-md flex items-center gap-2 text-xs font-black text-gray-400" style={{backdropFilter:'blur(4px)'}}>
+                      <Icon name="Share2" size={12} /> CLICK TO OPEN MAP
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* Footer */}
+          <footer className="text-gray-400 py-20 mt-10" style={{ background: '#111827' }}>
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="grid md:grid-cols-12 gap-12">
+                <div className="md:col-span-5">
+                  <div className="flex items-center gap-2 mb-6 opacity-50">
+                    <Logo dim />
+                  </div>
+                  <p className="text-sm leading-relaxed font-medium">
+                    연세대학교 출신 석박사 전문가들이 모여 만든 심리상담 전문 기관입니다.<br />
+                    당신의 소중한 마음이 다시 빛날 수 있도록 곁에서 돕겠습니다.
+                  </p>
+                </div>
+                <div className="md:col-span-4 space-y-4">
+                  <h5 className="font-black text-white text-lg">Contact & Office</h5>
+                  <div className="space-y-2 text-sm">
+                    <p className="flex items-center gap-3"><Icon name="Phone" size={16} /> 0507-1350-5394</p>
+                    <p className="flex items-start gap-3"><Icon name="MapPin" size={16} className="mt-1" /> 서울 중구 중림로 50-1 스카이천사빌딩 B2</p>
+                    <p className="flex items-center gap-3 font-bold text-blue-400"><Icon name="Share2" size={16} /> 인스타그램 @yonsei_seoullo</p>
+                  </div>
+                </div>
+                <div className="md:col-span-3 space-y-6">
+                  <h5 className="font-black text-white text-lg">Social Connect</h5>
+                  <div className="flex flex-wrap gap-2">
+                    <a href="https://blog.naver.com/yonseiseoullo" target="_blank" className="text-white px-4 py-2 rounded-xl text-xs font-black" style={{ background: '#03C75A' }}>Blog</a>
+                    <a href="http://pf.kakao.com/_xixbJJxj/chat" target="_blank" className="px-4 py-2 rounded-xl text-xs font-black" style={{ background: '#FEE500', color: '#3C1E1E' }}>Kakao</a>
+                  </div>
+                  <div className="flex gap-4 text-xs font-bold pt-4 border-t border-gray-800">
+                    <button className="hover:text-white transition-colors">이용약관</button>
+                    <button className="hover:text-white transition-colors">개인정보처리방침</button>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-20 pt-8 border-t border-gray-800 text-center">
+                <p className="text-xs uppercase tracking-widest font-black opacity-30">
+                  © 2024 Yonsei Seoullo Counseling Center. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </footer>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
